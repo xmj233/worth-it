@@ -1,5 +1,5 @@
 export default defineNuxtConfig({
-  devtools: { enabled: true },
+  modules: ["@nuxtjs/tailwindcss"],
   ssr: false,
   devServer: { host: "0.0.0.0" },
   nitro: { preset: "static" },
