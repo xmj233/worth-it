@@ -1,5 +1,11 @@
 export default defineNuxtConfig({
-  modules: ["@nuxtjs/tailwindcss"],
+  modules: ["@nuxt/ui"],
+  fonts: {
+    providers: {
+      google: false,
+      googleicons: false,
+    },
+  },
   ssr: false,
   devServer: { host: "0.0.0.0" },
   nitro: { preset: "static" },
