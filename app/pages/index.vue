@@ -17,7 +17,7 @@ const date = shallowRef(new CalendarDate(2022, 2, 3))
         <div class="hidden md:flex relative overflow-hidden min-w-[450px] rounded-lg">
           <JournalCard2 />
         </div>
-        <div class="flex md:hidden rounded-lg overflow-hidden">
+        <div class="flex md:hidden rounded-lg overflow-hidden bg-white dark:bg-gray-900 min-h-[500px]">
           <JournalCard3 />
         </div>
 
