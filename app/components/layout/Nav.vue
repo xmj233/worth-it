@@ -1,36 +1,38 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
+import { useI18n } from '~/composables/useI18n'
 
 const route = useRoute()
+const { t } = useI18n()
 
-const items = ref([
+const items = computed(() => [
   {
-    label: 'Now',
+    label: t.value.nav.now,
     icon: 'i-lucide-map-pin',
     to: '/',
     match: 'now'
   },
   {
-    label: 'Then',
+    label: t.value.nav.then,
     icon: 'i-lucide-footprints',
     to: '/then',
     match: 'then'
   },
   // Primary Floating Action Button inside Tab Bar
   {
-    label: 'Track',
+    label: t.value.nav.track,
     icon: 'i-lucide-plus',
     to: '/add',
     isAction: true
   },
   {
-    label: 'Context',
+    label: t.value.nav.context,
     icon: 'i-lucide-layers-2',
     to: '/context',
     match: 'context'
   },
   {
-    label: 'Settings',
+    label: t.value.nav.settings,
     icon: 'i-lucide-bolt',
     to: '/settings',
     match: 'settings'

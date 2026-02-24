@@ -1,21 +1,28 @@
 <script setup lang="ts">
+import { useI18n } from '~/composables/useI18n'
+
+const { t, tf } = useI18n()
+
 // ── Greeting based on time of day ──
 const now = new Date()
 const hour = now.getHours()
 
 const greeting = computed(() => {
-  if (hour < 6) return { text: 'Good night', emoji: '🌙' }
-  if (hour < 12) return { text: 'Good morning', emoji: '☀️' }
-  if (hour < 18) return { text: 'Good afternoon', emoji: '🌤️' }
-  return { text: 'Good evening', emoji: '🌙' }
+  if (hour < 6) return { text: t.value.greeting.night, emoji: '🌙' }
+  if (hour < 12) return { text: t.value.greeting.morning, emoji: '☀️' }
+  if (hour < 18) return { text: t.value.greeting.afternoon, emoji: '🌤️' }
+  return { text: t.value.greeting.evening, emoji: '🌙' }
 })
 
 // ── Today's date ──
 const todayDay = now.getDate()
-const todayFormatted = now.toLocaleDateString(undefined, {
-  weekday: 'long',
-  month: 'long',
-  day: 'numeric'
+// Formatted date based on reactive locale
+const todayFormatted = computed(() => {
+  return new Intl.DateTimeFormat(t.value.nav.now === 'Now' ? 'en-US' : 'zh-CN', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric'
+  }).format(now)
 })
 </script>
 
@@ -51,9 +58,9 @@ const todayFormatted = now.toLocaleDateString(undefined, {
       <div class="flex items-center justify-between px-5 mb-3">
         <div class="flex items-center gap-2">
           <UIcon name="i-lucide-camera" class="w-4 h-4 text-gray-400" />
-          <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Moments</h2>
+          <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ t.sections.moments }}</h2>
         </div>
-        <span class="text-xs text-gray-400 dark:text-gray-500 font-medium">See all</span>
+        <span class="text-xs text-gray-400 dark:text-gray-500 font-medium">{{ t.sections.seeAll }}</span>
       </div>
       <div class="px-5">
         <JournalCard />
@@ -65,9 +72,9 @@ const todayFormatted = now.toLocaleDateString(undefined, {
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2">
           <UIcon name="i-lucide-pen-line" class="w-4 h-4 text-gray-400" />
-          <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Journal</h2>
+          <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ t.sections.journal }}</h2>
         </div>
-        <span class="text-xs text-gray-400 dark:text-gray-500 font-medium">3 entries</span>
+        <span class="text-xs text-gray-400 dark:text-gray-500 font-medium">{{ tf(t.sections.entries, { n: 3 }) }}</span>
       </div>
       <div class="flex flex-col gap-3">
         <JournalDiaryCard

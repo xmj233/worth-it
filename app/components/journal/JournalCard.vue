@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useI18n } from '~/composables/useI18n'
+
+const { t, tf } = useI18n()
+
 type DiaryImage = {
   id: number | string
   src: string
@@ -88,8 +92,8 @@ function navigateImage(direction: 'prev' | 'next') {
       <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-800 mb-3">
         <UIcon name="i-lucide-image" class="w-6 h-6 text-gray-400" />
       </div>
-      <div class="text-sm text-gray-500 dark:text-gray-400 font-medium">No moments yet</div>
-      <div class="mt-1 text-xs text-gray-400 dark:text-gray-500">Photos you take will appear here.</div>
+      <div class="text-[15px] text-gray-700 dark:text-gray-300 font-semibold">{{ t.moments.empty }}</div>
+      <div class="mt-1 text-xs text-gray-400 dark:text-gray-500 font-medium">{{ t.moments.emptyHint }}</div>
     </div>
 
     <!-- Horizontal moments carousel -->
@@ -129,7 +133,7 @@ function navigateImage(direction: 'prev' | 'next') {
                 {{ group.label }}
               </span>
               <span class="text-[10px] text-gray-400 dark:text-gray-500">
-                {{ group.images.length }} photos
+                {{ tf(t.moments.photos, { n: group.images.length }) }}
               </span>
             </div>
           </button>
