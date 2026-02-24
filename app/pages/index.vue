@@ -1,35 +1,97 @@
 <script setup lang="ts">
-import { CalendarDate } from '@internationalized/date'
+// ── Greeting based on time of day ──
+const now = new Date()
+const hour = now.getHours()
 
-const date = shallowRef(new CalendarDate(2022, 2, 3))
+const greeting = computed(() => {
+  if (hour < 6) return { text: 'Good night', emoji: '🌙' }
+  if (hour < 12) return { text: 'Good morning', emoji: '☀️' }
+  if (hour < 18) return { text: 'Good afternoon', emoji: '🌤️' }
+  return { text: 'Good evening', emoji: '🌙' }
+})
+
+// ── Today's date ──
+const todayDay = now.getDate()
+const todayFormatted = now.toLocaleDateString(undefined, {
+  weekday: 'long',
+  month: 'long',
+  day: 'numeric'
+})
 </script>
 
 <template>
-  <div class="min-h-screen py-4 px-4 bg-white dark:bg-gray-900">
-    <UCard class="border-0 shadow-none bg-transparent">
-      <template #header>
-        <div class="px-2 pt-2">
-          <UInputDate v-model="date" size="lg" />
-        </div>
-      </template>
+  <div class="min-h-screen bg-white dark:bg-gray-900">
 
-      <div class="flex flex-col gap-6">
-        <div class="rounded-lg overflow-hidden bg-white dark:bg-gray-900 min-h-[500px]">
-          <JournalCard />
+    <!-- ━━━ Greeting Header ━━━ -->
+    <div class="px-5 pt-6 pb-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <!-- Large date number -->
+          <div class="w-14 h-14 rounded-2xl bg-gray-900 dark:bg-white flex items-center justify-center shadow-lg shadow-gray-900/15 dark:shadow-white/15">
+            <span class="text-2xl font-bold text-white dark:text-gray-900 tabular-nums">{{ todayDay }}</span>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-gray-50 tracking-tight">
+              {{ greeting.text }} {{ greeting.emoji }}
+            </h1>
+            <p class="text-sm text-gray-400 dark:text-gray-500 mt-0.5 font-medium">
+              {{ todayFormatted }}
+            </p>
+          </div>
         </div>
-
-        <div class="flex flex-col gap-4">
-          <JournalDiaryCard />
-          <JournalDiaryCard />
-          <JournalDiaryCard />
+        <!-- Avatar -->
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-md shadow-orange-200/40 dark:shadow-orange-900/20">
+          <span class="text-white text-sm font-bold">A</span>
         </div>
       </div>
+    </div>
 
-      <template #footer>
-        <div class="px-2 pb-2 text-sm text-gray-600 dark:text-gray-400">
-          this is tag
+    <!-- ━━━ Moments Section ━━━ -->
+    <section class="mt-6">
+      <div class="flex items-center justify-between px-5 mb-3">
+        <div class="flex items-center gap-2">
+          <UIcon name="i-lucide-camera" class="w-4 h-4 text-gray-400" />
+          <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Moments</h2>
         </div>
-      </template>
-    </UCard>
+        <span class="text-xs text-gray-400 dark:text-gray-500 font-medium">See all</span>
+      </div>
+      <div class="px-5">
+        <JournalCard />
+      </div>
+    </section>
+
+    <!-- ━━━ Journal Section ━━━ -->
+    <section class="mt-8 px-5">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <UIcon name="i-lucide-pen-line" class="w-4 h-4 text-gray-400" />
+          <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Journal</h2>
+        </div>
+        <span class="text-xs text-gray-400 dark:text-gray-500 font-medium">3 entries</span>
+      </div>
+      <div class="flex flex-col gap-3">
+        <JournalDiaryCard
+          time="08:15"
+          mood="🌅"
+          content="Woke up early today. The sunrise was beautiful — streaks of orange and pink across the sky. Made a cup of coffee and sat on the balcony for a while."
+          :tags="['morning', 'mindfulness']"
+        />
+        <JournalDiaryCard
+          time="12:30"
+          mood="😊"
+          content="Great lunch with the team. We talked about the upcoming project and everyone seems excited. I feel really grateful to work with such amazing people."
+          :tags="['work', 'gratitude']"
+        />
+        <JournalDiaryCard
+          time="21:00"
+          mood="📖"
+          content="Read a few chapters before bed. The book is getting really interesting — the protagonist just made a surprising choice that changes everything."
+          :tags="['reading', 'evening']"
+        />
+      </div>
+    </section>
+
+    <!-- Bottom spacer for nav bar -->
+    <div class="h-8" />
   </div>
 </template>

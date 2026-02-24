@@ -15,25 +15,14 @@ const images = ref<DiaryImage[]>([
   { id: 6, src: 'https://picsum.photos/900/700?random=31', alt: 'Photo 6', takenAt: 1770129426000 }
 ])
 
-
 const groupLabelFormatter = new Intl.DateTimeFormat(undefined, {
   hour: '2-digit',
   minute: '2-digit',
   hour12: false
 })
 
-const groupDateFormatter = new Intl.DateTimeFormat(undefined, {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit'
-})
-
 function formatGroupLabel(ms: number) {
   return groupLabelFormatter.format(new Date(ms))
-}
-
-function formatGroupDate(ms: number) {
-  return groupDateFormatter.format(new Date(ms))
 }
 
 function minuteBucket(ts: number) {
@@ -53,7 +42,6 @@ const groups = computed(() => {
     .map(([key, bucket]) => ({
       key,
       label: formatGroupLabel(bucket.firstTakenAt),
-      date: formatGroupDate(bucket.firstTakenAt),
       sortKey: key,
       images: bucket.images
     }))
@@ -94,114 +82,105 @@ function navigateImage(direction: 'prev' | 'next') {
 </script>
 
 <template>
-  <div class="w-full flex flex-col h-full min-h-[400px]">
-    <!-- Title Section -->
-    <div class="px-4 pt-4 pb-3 border-b border-gray-200/50 dark:border-gray-800/50">
-      <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-        Photos
-      </h2>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-        Grouped by time
-      </p>
+  <div class="w-full">
+    <!-- Empty state -->
+    <div v-if="groups.length === 0" class="py-12 text-center px-6">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-800 mb-3">
+        <UIcon name="i-lucide-image" class="w-6 h-6 text-gray-400" />
+      </div>
+      <div class="text-sm text-gray-500 dark:text-gray-400 font-medium">No moments yet</div>
+      <div class="mt-1 text-xs text-gray-400 dark:text-gray-500">Photos you take will appear here.</div>
     </div>
 
-    <!-- Groups Grid Section (Bottom) -->
-    <div class="flex-1 overflow-y-auto p-4">
-      <div v-if="groups.length === 0" class="h-full grid place-items-center text-center px-6">
-        <div>
-          <div class="text-sm text-gray-600 dark:text-gray-300 font-medium">No photos yet</div>
-          <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">Add images when writing a diary entry.</div>
-        </div>
-      </div>
+    <!-- Horizontal moments carousel -->
+    <div v-else class="flex gap-3 overflow-x-auto scrollbar-hide snap-x px-1 py-1">
+      <UModal v-for="group in groups" :key="group.key">
+        <template #default="{ open }">
+          <button
+            type="button"
+            class="snap-start shrink-0 w-[160px] rounded-2xl overflow-hidden bg-white dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800 shadow-sm active:scale-[0.97] transition-transform duration-200 p-2.5"
+            @click="openGroup(group.key, 0)"
+          >
+            <!-- Stacked overlapping thumbnails -->
+            <div class="relative aspect-[4/3]">
+              <div
+                v-for="(img, i) in group.images.slice(0, 3).reverse()"
+                :key="img.id"
+                class="absolute inset-0 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700 shadow-md"
+                :style="{
+                  transform: `translate(${(2 - i) * 5}px, ${(2 - i) * 5}px) rotate(${(2 - i) === 0 ? 0 : (2 - i) === 1 ? -2.5 : 3}deg)`,
+                  zIndex: i
+                }"
+              >
+                <img :src="img.src" :alt="img.alt || 'Photo'" class="w-full h-full object-cover" loading="lazy" />
+              </div>
 
-      <div v-else class="grid grid-cols-2 gap-4">
-        <UModal v-for="group in groups" :key="group.key">
-          <template #default="{ open }">
-            <button
-              type="button"
-              class="text-left rounded-xl border border-gray-200/60 dark:border-gray-800/60 bg-white/70 dark:bg-gray-900/70 p-3 shadow-sm active:scale-[0.99] transition w-full"
-              @click="openGroup(group.key, 0)"
-            >
-              <div class="flex items-center justify-between">
-                <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  {{ group.label }}
-                </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400 tabular-nums">
+              <!-- Count badge -->
+              <div class="absolute -bottom-0.5 -right-0.5 z-20">
+                <span class="inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold shadow">
                   {{ group.images.length }}
-                </div>
-              </div>
-
-              <!-- -- stacked preview -->
-              <div class="mt-3 relative aspect-[4/3]">
-                <div
-                  v-for="(img, i) in group.images.slice(0, 3)"
-                  :key="img.id"
-                  class="absolute inset-0 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-md"
-                  :style="{
-                    transform: `translate(${i * 6}px, ${i * 6}px) rotate(${i === 0 ? 0 : i === 1 ? -3 : 3}deg)`,
-                    zIndex: 10 - i
-                  }"
-                >
-                  <img :src="img.src" :alt="img.alt || 'Photo'" class="w-full h-full object-cover" loading="lazy" />
-                </div>
-
-                <!-- count badge -->
-                <div class="absolute bottom-2 right-2 z-20">
-                  <div class="px-2 py-1 rounded-full bg-black/60 text-white text-[11px] font-medium">
-                    {{ group.images.length }}
-                  </div>
-                </div>
-              </div>
-            </button>
-          </template>
-
-          <template #content="{ close }">
-            <div v-if="currentImage" class="relative">
-              <!-- Navigation Buttons -->
-              <button
-                v-if="(currentGroup?.images.length || 0) > 1"
-                @click.stop="navigateImage('prev')"
-                class="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
-                aria-label="Previous image"
-              >
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-
-              <button
-                v-if="(currentGroup?.images.length || 0) > 1"
-                @click.stop="navigateImage('next')"
-                class="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
-                aria-label="Next image"
-              >
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-
-              <!-- Image -->
-              <div class="relative w-full max-h-[80vh] flex flex-col items-center">
-                <img
-                  :src="currentImage.src"
-                  :alt="currentImage.alt"
-                  class="w-full h-auto max-h-[70vh] object-contain rounded-lg"
-                />
-                
-                <!-- Image Info -->
-                <div class="w-full px-6 py-4 bg-gray-50 dark:bg-gray-900 rounded-b-lg">
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    {{ currentGroup?.label }}
-                  </h3>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {{ selectedIndex + 1 }} / {{ currentGroup?.images.length || 0 }}
-                  </p>
-                </div>
+                </span>
               </div>
             </div>
-          </template>
-        </UModal>
-      </div>
+
+            <!-- Time label below stack -->
+            <div class="mt-2.5 flex items-center justify-between">
+              <span class="text-xs font-semibold text-gray-700 dark:text-gray-200 tabular-nums">
+                {{ group.label }}
+              </span>
+              <span class="text-[10px] text-gray-400 dark:text-gray-500">
+                {{ group.images.length }} photos
+              </span>
+            </div>
+          </button>
+        </template>
+
+        <template #content="{ close }">
+          <div v-if="currentImage" class="relative">
+            <!-- Navigation Buttons -->
+            <button
+              v-if="(currentGroup?.images.length || 0) > 1"
+              @click.stop="navigateImage('prev')"
+              class="absolute left-3 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 text-white transition-colors"
+              aria-label="Previous image"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            <button
+              v-if="(currentGroup?.images.length || 0) > 1"
+              @click.stop="navigateImage('next')"
+              class="absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 text-white transition-colors"
+              aria-label="Next image"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            <!-- Image -->
+            <div class="relative w-full max-h-[85vh] flex flex-col items-center bg-black rounded-xl overflow-hidden">
+              <img
+                :src="currentImage.src"
+                :alt="currentImage.alt"
+                class="w-full h-auto max-h-[75vh] object-contain"
+              />
+
+              <!-- Image Info Bar -->
+              <div class="w-full px-5 py-3.5 bg-gray-950 flex items-center justify-between">
+                <span class="text-sm font-medium text-white">
+                  {{ currentGroup?.label }}
+                </span>
+                <span class="text-xs text-gray-400 tabular-nums">
+                  {{ selectedIndex + 1 }} / {{ currentGroup?.images.length || 0 }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </template>
+      </UModal>
     </div>
   </div>
 </template>

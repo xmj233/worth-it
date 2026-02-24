@@ -1,2 +1,23 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+/* ── Scrollbar Hide ── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Scroll Snap ── */
+.snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.snap-start {
+  scroll-snap-align: start;
+}
+.snap-center {
+  scroll-snap-align: center;
+}
